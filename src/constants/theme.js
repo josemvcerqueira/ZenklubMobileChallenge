@@ -3,6 +3,8 @@ const colors = {
   primaryLight: '#8A71F2',
   white: '#FBFBFF',
   black: '#122336',
+  gray: '#808080',
+  grayLight: '#d3d3d3',
 };
 
 const text = {

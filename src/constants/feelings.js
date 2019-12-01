@@ -12,3 +12,8 @@ export default [
   {emoji: '😪', text: 'depressed'},
   {emoji: '😈', text: 'wicked'},
 ];
+
+export const FeelingObj = {
+  emoji: '👌️',
+  text: 'okay',
+};

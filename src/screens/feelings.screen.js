@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Text,
   ScrollView,
   View,
   StyleSheet,
@@ -8,15 +7,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import {Layout} from '../components';
+import {Layout, Paragraph} from '../components';
 import EMOJI_ARR from '../constants/feelings';
 import theme from '../constants/theme';
 import NavigationService from '../api/navigation-service';
 import Screens from '../constants/screens';
-
-const Paragraph = ({style = styles.paragraph, ...otherProps}) => (
-  <Text style={style} {...otherProps} />
-);
 
 const Emoji = props => <Paragraph style={styles.emoji} {...props} />;
 
@@ -45,7 +40,7 @@ const FeelingBubbleContainer = ComponentToEnrich => props => {
 
 const Bubbles = FeelingBubbleContainer(FeelingBubble);
 
-const Title = props => <Paragraph {...props} />;
+const Title = props => <Paragraph style={styles.title} {...props} />;
 
 const Content = ({data}) => (
   <ScrollView
@@ -70,7 +65,7 @@ export default () => {
         barStyle="light-content"
         backgroundColor={theme.colors.primary}
       />
-      <Title style={styles.title}>How are you feeling?</Title>
+      <Title>How are you feeling?</Title>
       <Content data={EMOJI_ARR} />
     </Layout>
   );
@@ -119,5 +114,4 @@ const styles = StyleSheet.create({
     fontSize: theme.sizes.base * 1.2,
     textTransform: 'capitalize',
   },
-  paragraph: {fontSize: theme.sizes.base},
 });
