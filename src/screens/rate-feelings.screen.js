@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import {StyleSheet, StatusBar, View, TouchableOpacity} from 'react-native';
 import SliderBar from '@react-native-community/slider';
 
@@ -8,7 +8,8 @@ import {Layout, Paragraph} from '../components';
 import {capitalizeFirstLetter} from '../utils/helper-functions';
 import NavigationService from '../api/navigation-service';
 import Screens from '../constants/screens';
-import set from '@babel/runtime/helpers/esm/set';
+import Context from '../store/context';
+import FeelingActions from '../constants/action-types';
 
 const LargeEmoji = props => <Paragraph style={styles.largeEmoji} {...props} />;
 
@@ -23,11 +24,9 @@ const Feeling = props => (
   <Paragraph style={[styles.title, styles.feeling]} {...props} />
 );
 
-const Button = props => (
+const Button = ({handleNext}) => (
   <View style={styles.buttonContainer}>
-    <TouchableOpacity
-      style={styles.button}
-      onPress={() => NavigationService.navigate(Screens.Feelings)}>
+    <TouchableOpacity style={styles.button} onPress={() => handleNext()}>
       <Paragraph style={styles.buttonText}>Next</Paragraph>
     </TouchableOpacity>
   </View>
@@ -39,16 +38,18 @@ const Description = props => (
   <Paragraph style={styles.sliderDescription} {...props} />
 );
 
-const Slider = ({feeling, setFeeling}) => (
+const Slider = ({feelingValue, setFeelingValue}) => (
   <View style={styles.sliderContainer}>
-    <Description>{feeling}% | Slighly</Description>
+    <Description>
+      {feelingValue}% | {FeelingObj[feelingValue]}
+    </Description>
     <SliderBar
       style={styles.slider}
       minimumValue={0}
       maximumValue={100}
       step={25}
-      value={feeling}
-      onValueChange={setFeeling}
+      value={feelingValue}
+      onValueChange={setFeelingValue}
       thumbTintColor={theme.colors.primary}
       minimumTrackTintColor={theme.colors.primaryLight}
       maximumTrackTintColor={theme.colors.grayLight}
@@ -56,23 +57,46 @@ const Slider = ({feeling, setFeeling}) => (
   </View>
 );
 
-const Header = () => (
+const Header = ({emoji, text, feelingValue}) => (
   <View style={styles.header}>
-    <LargeEmoji>{FeelingObj.emoji}</LargeEmoji>
+    <LargeEmoji>{emoji}</LargeEmoji>
     <Title>{titleString}</Title>
-    <Feeling>{FeelingObj.text}</Feeling>
+    <Feeling>
+      {FeelingObj[feelingValue]} {text}
+    </Feeling>
     <Caption>{captionString}</Caption>
   </View>
 );
 
 export default () => {
-  const [feeling, setFeeling] = useState(0);
+  const {
+    state: {currentFeeling},
+    dispatch,
+  } = useContext(Context);
+  const [feelingValue, setFeelingValue] = useState(0);
+
+  useEffect(() => {
+    setFeelingValue(parseInt(currentFeeling.value, 10));
+  }, [currentFeeling.value]);
+
+  const handleNext = () => {
+    dispatch({
+      type: FeelingActions.ADD_FEELING,
+      payload: {...currentFeeling, value: feelingValue.toString(10)},
+    });
+    NavigationService.navigate(Screens.Feelings);
+  };
+
   return (
     <Layout safeAreaStyles={styles.layout}>
       <StatusBar barStyle="dark-content" backgroundColor={theme.colors.white} />
-      <Header />
-      <Slider feeling={feeling} setFeeling={setFeeling} />
-      <Button />
+      <Header
+        emoji={currentFeeling.emoji}
+        feelingValue={feelingValue}
+        text={currentFeeling.text}
+      />
+      <Slider feelingValue={feelingValue} setFeelingValue={setFeelingValue} />
+      <Button handleNext={handleNext} />
     </Layout>
   );
 };
@@ -84,9 +108,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  largeEmoji: {fontSize: theme.sizes.padding * 3.5},
+  largeEmoji: {fontSize: theme.sizes.padding * 3},
   title: {
-    fontSize: theme.sizes.padding * 2,
+    fontSize: theme.sizes.padding * 1.2,
     color: theme.colors.black,
     fontWeight: '600',
   },
